@@ -110,6 +110,8 @@ DELETE `/CRUD/v1/{id}`
 ---
 
 ## ▶️ Run Locally
+##First install all the requirements to run the model
+run:pip install -r requirements.txt
 Run Backend:uvicorn main:app --reload or python -m uvicorn main:app --reload
 Then open another terminal and run cd Frontend
 Run Frontend:streamlit run frontend.py or python -m streamlit run frontend.py
