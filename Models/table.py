@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String,Text,DateTime,ForeignKey
+from sqlalchemy import Column, Integer, String,Text,DateTime,ForeignKey,Date,JSON
 from datetime import datetime
+from typing import Literal
 from Database.database import Base
 
 class Users(Base):
@@ -8,13 +9,16 @@ class Users(Base):
     id = Column(Integer, primary_key=True, index=True)
     username=Column(String(50), unique=True, index=True)
     hashed_Password=Column(String(255))
-    role = Column(String, default="user")
+    roles = Column(JSON, default=list)
 
 
 class Task(Base):
     __tablename__="Task"
 
     id = Column(Integer, primary_key=True, index=True)
-    task = Column(String, nullable=False)
+    amount = Column(Integer, nullable=False)
+    type = Column(String, nullable=False)
+    category=Column(String, nullable=False)
+    Date=Column(Date, nullable=False)
     owner_id=Column(Integer,ForeignKey("Users.id"), index=True)
-    description = Column(String, nullable=True)
+    notes = Column(String, nullable=True)

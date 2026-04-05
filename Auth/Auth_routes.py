@@ -16,7 +16,8 @@ def register(user:UserCreate,db:Session=Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already exists")
     new_user=Users(
         username=user.username,
-        hashed_Password=hash_password(user.password)
+        hashed_Password=hash_password(user.password),
+        roles=user.roles
     )
     db.add(new_user)
     db.commit()
@@ -27,6 +28,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),db:Session=Depends(ge
     db_user=db.query(Users).filter(Users.username==form_data.username).first()
     if not db_user or not verify_password(form_data.password,db_user.hashed_Password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token=create_access_token({"sub":db_user.username,"role": db_user.role,"user_id": db_user.id})
+
+    token=create_access_token({"sub":db_user.username,"role": db_user.roles,"user_id": db_user.id})
     return {"access_token":token,"token_type": "bearer"}

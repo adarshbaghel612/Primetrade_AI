@@ -1,21 +1,30 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel,Field
+from typing import Optional, Literal
+from datetime import date
 
 class Create(BaseModel):
-    Task:str
-    Description:str
+    amount: float = Field(..., gt=0, description="Transaction amount")
+    type: Literal["income", "expense"] = Field(..., description="Type of transaction")
+    category: str = Field(..., min_length=1, max_length=100)
+    Date: date = Field(..., description="Transaction date")
+    notes: Optional[str] = Field(None, max_length=255, description="Optional description")
 
 class Update(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
+    amount: Optional[float] = Field(None, gt=0)
+    type: Optional[Literal["income", "expense"]] = None
+    category: Optional[str] = Field(None, min_length=2, max_length=50)
+    notes: Optional[str] = Field(None, max_length=255)
 
 class ShowTask(Create):
     id:int
     
 class Show(BaseModel):
     id:int
-    task:str
-    description:str
+    amount:float
+    type:str
+    category:str
+    Date:date
+    notes:str
 
     model_config = {
         "from_attributes": True
