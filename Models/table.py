@@ -17,7 +17,6 @@ class Task(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Integer, nullable=False)
-    type = Column(String, nullable=False)
     category=Column(String, nullable=False)
     Date=Column(Date, nullable=False)
     owner_id=Column(Integer,ForeignKey("Users.id"), index=True)

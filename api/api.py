@@ -15,7 +15,6 @@ Base.metadata.create_all(bind=engine)
 @router.post("/Create",response_model=Show)
 def Create(request:Create,db:Session = Depends(get_db),current_user=Depends((require_role(["Admin"])))):
     Create_task=Task(amount=request.amount,
-                     type=request.type,
                      category=request.category,
                      Date=request.Date,
                      notes=request.notes,
@@ -36,24 +35,36 @@ def Get_Task(id:int,db:Session=Depends(get_db),current_user=Depends((require_rol
 
 @router.get("/filter")
 def get_tasks(
-    type: Optional[str] = None,
+    id: Optional[int] = None,
     category: Optional[str] = None,
-    date: Optional[date] = None,
+    Date: Optional[date] = None,
     db: Session = Depends(get_db),
-    current_user=Depends((require_role(["Admin","Analyst"])))
-):
-    query = db.query(Task)
+    current_user=Depends(require_role(["Admin", "Analyst"]))):
+    if not any([id, category, Date]):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one filter is required")
 
-    if type:
-        query = query.filter(Task.type == type,Task.owner_id == current_user.id)
+    query = db.query(Task).filter(
+        Task.owner_id == current_user.id
+    )
 
-        if category:
-            query = query.filter(func.lower(Task.category) == category.lower(),Task.owner_id == current_user.id)
+    if id:
+        task = query.filter(Task.id == id).first()
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return task
 
-        if date:
-            query=query.filter(Task.date==date,Task.owner_id == current_user.id)
-    
+    if category:
+        query = query.filter(
+            func.lower(Task.category) == category.lower()
+        )
+
+    if Date:
+        query = query.filter(Task.Date == Date)
+
     return query.all()
+    
 
 
 @router.get("/tasks")
@@ -71,6 +82,7 @@ def update_task(
     updated_data: Update,
     db: Session = Depends(get_db),
     current_user=Depends((require_role(["Admin"])))):
+    
     task = db.query(Task).filter(Task.id == task_id,Task.owner_id == current_user.id).first()
 
     if not task:
@@ -79,9 +91,6 @@ def update_task(
     
     if updated_data.amount is not None:
         task.amount = updated_data.amount
-
-    if updated_data.type is not None:
-        task.type = updated_data.type
 
     if updated_data.category is not None:
         task.category = updated_data.category
